@@ -4090,7 +4090,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
             //printf(" -- %s\n", mn.vin.ToString().c_str());
 
             if(mn.vin == vin) {
-                if(!mn.UpdatedWithin(5*60*1000)){
+                if(!mn.UpdatedWithin(MASTERNODE_MIN_MICROSECONDS)){
                     mn.UpdateLastSeen(lastUpdated);
 
                     if(count == -1)

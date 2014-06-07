@@ -40,9 +40,9 @@ class CBitcoinAddress;
 #define START_MASTERNODE_PAYMENTS 1403107200 //Wed, 18 Jun 2014 16:00:00 GMT
 
 #define MASTERNODE_MIN_CONFIRMATIONS           6
-#define MASTERNODE_MIN_MICROSECONDS            55*60*1000
-#define MASTERNODE_PING_SECONDS                60*60
-#define MASTERNODE_EXPIRATION_MICROSECONDS     65*60*1000
+#define MASTERNODE_MIN_MICROSECONDS            5*60*1000*1000
+#define MASTERNODE_PING_SECONDS                30*60
+#define MASTERNODE_EXPIRATION_MICROSECONDS     35*60*1000*1000
 
 
 struct CBlockIndexWorkComparator;
@@ -2449,7 +2449,7 @@ public:
     void UpdateLastSeen(int64 override=0)
     {
         if(override == 0){
-            lastTimeSeen = GetTimeMillis();
+            lastTimeSeen = GetTimeMicros();
         } else {
             lastTimeSeen = override;
         }
@@ -2457,10 +2457,11 @@ public:
 
     void Check();
 
-    bool UpdatedWithin(int milliSeconds)
+    bool UpdatedWithin(int microSeconds)
     {
-        //printf("UpdatedWithin %"PRI64u"\n", GetTimeMillis() - lastTimeSeen);
-        return GetTimeMillis() - lastTimeSeen < milliSeconds;
+        //printf("UpdatedWithin %"PRI64u", %"PRI64u" --  %d \n", GetTimeMicros() , lastTimeSeen, (GetTimeMicros() - lastTimeSeen) < microSeconds);
+
+        return (GetTimeMicros() - lastTimeSeen) < microSeconds;
     }
 
     void Disable()
@@ -2491,7 +2492,7 @@ static const int64 POOL_FEE_AMOUNT = 0.025*COIN;
 class CDarkSendPool
 {
 public:
-    static const int MIN_PEER_PROTO_VERSION = 70015;
+    static const int MIN_PEER_PROTO_VERSION = 70016;
 
     CTxIn vinMasterNode;
     CPubKey pubkeyMasterNode;

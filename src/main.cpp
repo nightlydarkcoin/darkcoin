@@ -2665,7 +2665,7 @@ bool CBlock::CheckBlock(CValidationState &state, bool fCheckPOW, bool fCheckMerk
 
 
                 printf ("CheckBlock() : nHeight : %d\n", pindexPrev->nHeight);
-                printf ("CheckBlock() : hashPrevBlock : %s\n", hashPrevBlock);
+                printf ("CheckBlock() : hashPrevBlock : %s\n", hashPrevBlock.ToString().c_str());
                 printf ("CheckBlock() : pindexPrev->GetBlockHash() : %s\n", pindexPrev->GetBlockHash().ToString().c_str());
 
                 votingRecordsBlockPrev = blockLast.vmn.size();
@@ -2684,7 +2684,7 @@ bool CBlock::CheckBlock(CValidationState &state, bool fCheckPOW, bool fCheckMerk
                             if((mv1.blockHeight == mv2.blockHeight && (mv1.GetVotes() == 1 || mv1.GetPubKey() == mv2.GetPubKey()))){
                                 matchingVoteRecords++;
                                 if(mv1.GetVotes() != mv2.GetVotes() && mv1.GetVotes()+1 != mv2.GetVotes()) {
-                                    printf(" BAD VOTE DETECTED:  %d %d\n", mv1.blockHeight, mv1.GetPubKey().ToString().c_str());
+                                    printf(" BAD VOTE DETECTED:  %"PRI64u" %s\n", mv1.blockHeight, mv1.GetPubKey().ToString().c_str());
                                     printf("  -- %d %d\n", mv1.GetVotes(), mv2.GetVotes());
                                     badVote++;
                                 }

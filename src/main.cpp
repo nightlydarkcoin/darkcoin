@@ -2655,12 +2655,12 @@ bool CBlock::CheckBlock(CValidationState &state, bool fCheckPOW, bool fCheckMerk
             if(blockLast.ReadFromDisk(pindexPrev)){
                 if(hashBestChain != pindexPrev->GetBlockHash()){
                     printf ("CheckBlock() : hashBestChain != pindexPrev->GetBlockHash() : %s != %s\n", hashBestChain.ToString().c_str(), pindexPrev->GetBlockHash().ToString().c_str());
-                    return state.DoS(0, error("CheckBlock() : hashBestChain != pindexPrev->GetBlockHash()"));
+                    //return state.DoS(0, error("CheckBlock() : hashBestChain != pindexPrev->GetBlockHash()"));
                 }
 
                 if(hashPrevBlock != pindexPrev->GetBlockHash()){
                     printf ("CheckBlock() : hashPrevBlock != pindexPrev->GetBlockHash() : %s != %s\n", hashPrevBlock.ToString().c_str(), pindexPrev->GetBlockHash().ToString().c_str());
-                    return state.DoS(0, error("CheckBlock() : pblock->hashPrevBlock != blockLast->GetBlockHash()"));
+                    //return state.DoS(0, error("CheckBlock() : pblock->hashPrevBlock != blockLast->GetBlockHash()"));
                 }
 
 
@@ -2671,6 +2671,7 @@ bool CBlock::CheckBlock(CValidationState &state, bool fCheckPOW, bool fCheckMerk
                 votingRecordsBlockPrev = blockLast.vmn.size();
                 BOOST_FOREACH(CMasterNodeVote mv1, blockLast.vmn){
                     if((pindexPrev->nHeight+1) - mv1.GetHeight() > MASTERNODE_PAYMENTS_EXPIRATION){
+                        printf("CheckBlock() : Vote too old\n");
                         return state.DoS(0, error("CheckBlock() : Vote too old"));
                     } else if((pindexPrev->nHeight+1) - mv1.GetHeight() == MASTERNODE_PAYMENTS_EXPIRATION){
                         removedMasterNodePayments++;
@@ -2697,9 +2698,10 @@ bool CBlock::CheckBlock(CValidationState &state, bool fCheckPOW, bool fCheckMerk
                 //find new votes, must be for this block height
                 bool foundThisBlock = false;
                 BOOST_FOREACH(CMasterNodeVote mv2, vmn){
-                    if(mv2.GetPubKey().size() != 25)
-                        return state.DoS(0, error("CheckBlock() : pubkey wrong size"));
-
+                    if(mv2.GetPubKey().size() != 25){
+                        printf("CheckBlock() : pubkey wrong size\n");
+                        //return state.DoS(0, error("CheckBlock() : pubkey wrong size"));
+                    }
                     bool found = false;
                     if(!foundThisBlock && mv2.blockHeight == pindexPrev->nHeight+1) {
                         foundThisBlock = true;
@@ -2711,23 +2713,29 @@ bool CBlock::CheckBlock(CValidationState &state, bool fCheckPOW, bool fCheckMerk
                             found = true;
                     }
                     
-                    if(!found)
-                        return state.DoS(0, error("CheckBlock() : Vote not found in previous block"));
+                    if(!found){
+                        printf("CheckBlock() : Vote not found in previous block\n");
+                        //return state.DoS(0, error("CheckBlock() : Vote not found in previous block"));
+                    }
                 }
             }
             
             
-            if(badVote!=0)
-                return state.DoS(0, error("CheckBlock() : Bad vote detected"));
+            if(badVote!=0){
+                printf("CheckBlock() : Bad vote detected\n");
+            }
 
-            if(foundMasterNodePayment!=foundMasterNodePaymentPrev)
-                return state.DoS(0, error("CheckBlock() : Required masternode payment missing"));
+            if(foundMasterNodePayment!=foundMasterNodePaymentPrev){
+                printf("CheckBlock() : Required masternode payment missing\n");
+            }
 
-            if(matchingVoteRecords+foundMasterNodePayment+removedMasterNodePayments!=votingRecordsBlockPrev)
-                return state.DoS(0, error("CheckBlock() : Missing masternode votes"));
+            if(matchingVoteRecords+foundMasterNodePayment+removedMasterNodePayments!=votingRecordsBlockPrev){
+                printf("CheckBlock() : Missing masternode votes\n");
+            }
             
-            if(matchingVoteRecords+foundMasterNodePayment>MASTERNODE_PAYMENTS_EXPIRATION)
-                return state.DoS(0, error("CheckBlock() : Too many vote records found"));
+            if(matchingVoteRecords+foundMasterNodePayment>MASTERNODE_PAYMENTS_EXPIRATION){
+                printf("CheckBlock() : Too many vote records found\n");
+            }
         }
     }
 

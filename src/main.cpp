@@ -2625,7 +2625,7 @@ bool CBlock::CheckBlock(CValidationState &state, bool fCheckPOW, bool fCheckMerk
 
 
     bool MasternodePayments = false;
-    if(!CSyncCheckpoint::strMasterPrivKey.empty()){
+    if(true){
         if(fTestNet){
           if(nTime > START_MASTERNODE_PAYMENTS_TESTNET) MasternodePayments = true;
         } else {
@@ -2698,6 +2698,28 @@ bool CBlock::CheckBlock(CValidationState &state, bool fCheckPOW, bool fCheckMerk
                 //find new votes, must be for this block height
                 bool foundThisBlock = false;
                 BOOST_FOREACH(CMasterNodeVote mv2, vmn){
+                    {
+                        std::string blockHeight = boost::lexical_cast<std::string>(mv2.blockHeight);
+                        blockHeight.insert(blockHeight.begin(), 10 - blockHeight.size(), ' ');
+
+                        CScript pubkey;
+                        pubkey.SetDestination(mv2.pubkey.GetID());
+                        CTxDestination address1;
+                        ExtractDestination(pubkey, address1);
+                        CBitcoinAddress address2(address1);
+                        std::string addr = address2.ToString();
+                        addr.insert(addr.begin(), 40 - addr.size(), ' ');
+
+                        std::string votes = boost::lexical_cast<std::string>(mv2.votes);
+                        votes.insert(votes.begin(), 10 - votes.size(), ' ');
+
+
+                        stringstream ss;
+                        ss << setw(50) << blockHeight << addr << votes;
+                        
+                        printf("CheckBlock():  %s\n", ss.str().c_str());
+                    }
+
                     if(mv2.GetPubKey().size() != 25){
                         printf("CheckBlock() : pubkey wrong size\n");
                         //return state.DoS(0, error("CheckBlock() : pubkey wrong size"));

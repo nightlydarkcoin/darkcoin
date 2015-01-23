@@ -75,7 +75,7 @@ script: |
   tar --strip-components=1 -xf ../$DISTNAME
   do_configure --bindir=$BINDIR 
   make $MAKEOPTS
-  make $MAKEOPTS install-strip
+  make $MAKEOPTS install
   make $MAKEOPTS clean
 
   # sort distribution tar file and normalize user/group/mtime information for deterministic output

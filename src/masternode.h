@@ -143,7 +143,7 @@ public:
         // * version byte (currently 0)
         // * all fields (?)
         {
-                LOCK(cs);
+                printf("masternode.h::146");LOCK(cs);
                 unsigned char nVersion = 0;
                 READWRITE(nVersion);
                 READWRITE(vin);

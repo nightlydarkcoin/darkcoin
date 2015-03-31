@@ -41,7 +41,7 @@ void ProcessMessageMasternodePayments(CNode* pfrom, std::string& strCommand, CDa
     }
     else if (strCommand == "mnw") { //Masternode Payments Declare Winner
 
-        LOCK(cs_masternodepayments);
+        printf("masternode.cpp::44");LOCK(cs_masternodepayments);
 
         //this is required in litemode
         CMasternodePaymentWinner winner;
@@ -135,7 +135,7 @@ bool GetBlockHash(uint256& hash, int nBlockHeight)
 
 CMasternode::CMasternode()
 {
-    LOCK(cs);
+    printf("masternode.cpp::138");LOCK(cs);
     vin = CTxIn();
     addr = CService();
     pubkey = CPubKey();
@@ -161,7 +161,7 @@ CMasternode::CMasternode()
 
 CMasternode::CMasternode(const CMasternode& other)
 {
-    LOCK(cs);
+    printf("masternode.cpp::164");LOCK(cs);
     vin = other.vin;
     addr = other.addr;
     pubkey = other.pubkey;
@@ -187,7 +187,7 @@ CMasternode::CMasternode(const CMasternode& other)
 
 CMasternode::CMasternode(CService newAddr, CTxIn newVin, CPubKey newPubkey, std::vector<unsigned char> newSig, int64_t newSigTime, CPubKey newPubkey2, int protocolVersionIn, CScript newDonationAddress, int newDonationPercentage)
 {
-    LOCK(cs);
+    printf("masternode.cpp::190");LOCK(cs);
     vin = newVin;
     addr = newAddr;
     pubkey = newPubkey;
@@ -394,7 +394,7 @@ bool CMasternodePayments::AddWinningMasternode(CMasternodePaymentWinner& winnerI
 
 void CMasternodePayments::CleanPaymentList()
 {
-    LOCK(cs_masternodepayments);
+    printf("masternode.cpp::397");LOCK(cs_masternodepayments);
 
     if(chainActive.Tip() == NULL) return;
 
@@ -412,7 +412,7 @@ void CMasternodePayments::CleanPaymentList()
 
 bool CMasternodePayments::ProcessBlock(int nBlockHeight)
 {
-    LOCK(cs_masternodepayments);
+    printf("masternode.cpp::415");LOCK(cs_masternodepayments);
 
     if(nBlockHeight <= nLastBlockHeight) return false;
     if(!enabled) return false;
@@ -503,7 +503,7 @@ void CMasternodePayments::Relay(CMasternodePaymentWinner& winner)
 
     vector<CInv> vInv;
     vInv.push_back(inv);
-    LOCK(cs_vNodes);
+    printf("masternode.cpp::506");LOCK(cs_vNodes);
     BOOST_FOREACH(CNode* pnode, vNodes){
         pnode->PushMessage("inv", vInv);
     }
@@ -511,7 +511,7 @@ void CMasternodePayments::Relay(CMasternodePaymentWinner& winner)
 
 void CMasternodePayments::Sync(CNode* node)
 {
-    LOCK(cs_masternodepayments);
+    printf("masternode.cpp::514");LOCK(cs_masternodepayments);
 
     BOOST_FOREACH(CMasternodePaymentWinner& winner, vWinning)
         if(winner.nBlockHeight >= chainActive.Tip()->nHeight-10 && winner.nBlockHeight <= chainActive.Tip()->nHeight + 20)

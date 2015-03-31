@@ -194,7 +194,7 @@ CMasternodeMan::CMasternodeMan() {
 
 bool CMasternodeMan::Add(CMasternode &mn)
 {
-    printf("masternodeman.cpp::197");LOCK(cs);
+    printf("masternodeman.cpp::197\n");LOCK(cs);
 
     if (!mn.IsEnabled())
         return false;
@@ -213,7 +213,7 @@ bool CMasternodeMan::Add(CMasternode &mn)
 
 void CMasternodeMan::Check()
 {
-    printf("masternodeman.cpp::216");LOCK(cs);
+    printf("masternodeman.cpp::216\n");LOCK(cs);
 
     BOOST_FOREACH(CMasternode& mn, vMasternodes)
         mn.Check();
@@ -221,7 +221,7 @@ void CMasternodeMan::Check()
 
 void CMasternodeMan::CheckAndRemove()
 {
-    printf("masternodeman.cpp::224");LOCK(cs);
+    printf("masternodeman.cpp::224\n");LOCK(cs);
 
     Check();
 
@@ -270,7 +270,7 @@ void CMasternodeMan::CheckAndRemove()
 
 void CMasternodeMan::Clear()
 {
-    printf("masternodeman.cpp::273");LOCK(cs);
+    printf("masternodeman.cpp::273\n");LOCK(cs);
     vMasternodes.clear();
     mAskedUsForMasternodeList.clear();
     mWeAskedForMasternodeList.clear();
@@ -305,7 +305,7 @@ int CMasternodeMan::CountMasternodesAboveProtocol(int protocolVersion)
 
 void CMasternodeMan::DsegUpdate(CNode* pnode)
 {
-    printf("masternodeman.cpp::308");LOCK(cs);
+    printf("masternodeman.cpp::308\n");LOCK(cs);
 
     std::map<CNetAddr, int64_t>::iterator it = mWeAskedForMasternodeList.find(pnode->addr);
     if (it != mWeAskedForMasternodeList.end())
@@ -322,7 +322,7 @@ void CMasternodeMan::DsegUpdate(CNode* pnode)
 
 CMasternode *CMasternodeMan::Find(const CTxIn &vin)
 {
-    printf("masternodeman.cpp::325");LOCK(cs);
+    printf("masternodeman.cpp::325\n");LOCK(cs);
 
     BOOST_FOREACH(CMasternode& mn, vMasternodes)
     {
@@ -334,7 +334,7 @@ CMasternode *CMasternodeMan::Find(const CTxIn &vin)
 
 CMasternode* CMasternodeMan::FindOldestNotInVec(const std::vector<CTxIn> &vVins, int nMinimumAge, int nMinimumActiveSeconds)
 {
-    printf("masternodeman.cpp::337");LOCK(cs);
+    printf("masternodeman.cpp::337\n");LOCK(cs);
 
     CMasternode *pOldestMasternode = NULL;
 
@@ -367,7 +367,7 @@ CMasternode* CMasternodeMan::FindOldestNotInVec(const std::vector<CTxIn> &vVins,
 
 CMasternode *CMasternodeMan::FindRandom()
 {
-    printf("masternodeman.cpp::370");LOCK(cs);
+    printf("masternodeman.cpp::370\n");LOCK(cs);
 
     if(size() == 0) return NULL;
 
@@ -511,7 +511,7 @@ void CMasternodeMan::ProcessMasternodeConnections()
     //we don't care about this for regtest
     if(RegTest()) return;
 
-    printf("masternodeman.cpp::514");LOCK(cs_vNodes);
+    printf("masternodeman.cpp::514\n");LOCK(cs_vNodes);
 
     if(!darkSendPool.pSubmittedToMasternode) return;
 
@@ -528,14 +528,14 @@ void CMasternodeMan::ProcessMasternodeConnections()
 
 void CMasternodeMan::RelayMasternodeEntry(const CTxIn vin, const CService addr, const std::vector<unsigned char> vchSig, const int64_t nNow, const CPubKey pubkey, const CPubKey pubkey2, const int count, const int current, const int64_t lastUpdated, const int protocolVersion, CScript donationAddress, int donationPercentage)
 {
-    printf("masternodeman.cpp::531");LOCK(cs_vNodes);
+    printf("masternodeman.cpp::531\n");LOCK(cs_vNodes);
     BOOST_FOREACH(CNode* pnode, vNodes)
         pnode->PushMessage("dsee", vin, addr, vchSig, nNow, pubkey, pubkey2, count, current, lastUpdated, protocolVersion, donationAddress, donationPercentage);
 }
 
 void CMasternodeMan::RelayMasternodeEntryPing(const CTxIn vin, const std::vector<unsigned char> vchSig, const int64_t nNow, const bool stop)
 {
-    printf("masternodeman.cpp::538");LOCK(cs_vNodes);
+    printf("masternodeman.cpp::538\n");LOCK(cs_vNodes);
     BOOST_FOREACH(CNode* pnode, vNodes)
         pnode->PushMessage("dseep", vin, vchSig, nNow, stop);
 }
@@ -546,7 +546,7 @@ void CMasternodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CData
     if(fLiteMode) return; //disable all Darksend/Masternode related functionality
     if(IsInitialBlockDownload()) return;
 
-    printf("masternodeman.cpp::549");LOCK(cs);
+    printf("masternodeman.cpp::549\n");LOCK(cs);
 
     if (strCommand == "dsee") { //DarkSend Election Entry
 
@@ -821,7 +821,7 @@ void CMasternodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CData
                 pmn->lastVote = GetAdjustedTime();
 
                 //send to all peers
-                printf("masternodeman.cpp::824");LOCK(cs_vNodes);
+                printf("masternodeman.cpp::824\n");LOCK(cs_vNodes);
                 BOOST_FOREACH(CNode* pnode, vNodes)
                     pnode->PushMessage("mvote", vin, vchSig, nVote);
             }

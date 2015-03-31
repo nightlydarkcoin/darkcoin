@@ -1595,7 +1595,7 @@ void CDarksendPool::ClearLastMessage()
 //
 bool CDarksendPool::DoAutomaticDenominating(bool fDryRun, bool ready)
 {
-    LOCK(cs_darksend);
+    printf("darksend.cpp::1598\n");LOCK(cs_darksend);
 
     if(IsInitialBlockDownload()) return false;
 
@@ -1810,7 +1810,7 @@ bool CDarksendPool::DoAutomaticDenominating(bool fDryRun, bool ready)
             LogPrintf("DoAutomaticDenominating -- attempt %d connection to Masternode %s\n", i, pmn->addr.ToString().c_str());
             if(ConnectNode((CAddress)pmn->addr, NULL, true)){
 
-                LOCK(cs_vNodes);
+                printf("darksend.cpp::1813\n");LOCK(cs_vNodes);
                 BOOST_FOREACH(CNode* pnode, vNodes)
                 {
                     if((CNetAddr)pnode->addr != (CNetAddr)pmn->addr) continue;
@@ -2426,7 +2426,7 @@ void CDarksendQueue::SetSharedKey(std::string strSharedKeyIn)
 bool CDarksendQueue::Relay()
 {
 
-    LOCK(cs_vNodes);
+    printf("darksend.cpp::2429\n");LOCK(cs_vNodes);
     BOOST_FOREACH(CNode* pnode, vNodes){
         // always relay to everyone
         pnode->PushMessage("dsq", (*this));
@@ -2469,7 +2469,7 @@ bool CDarksendQueue::CheckSignature()
 
 void CDarksendPool::RelayFinalTransaction(const int sessionID, const CTransaction& txNew)
 {
-    LOCK(cs_vNodes);
+    printf("darksend.cpp::2472\n");LOCK(cs_vNodes);
     BOOST_FOREACH(CNode* pnode, vNodes)
     {
         pnode->PushMessage("dsf", sessionID, txNew);
@@ -2520,7 +2520,7 @@ void CDarksendPool::RelayIn(const std::vector<CTxDSIn>& vin, const int64_t& nAmo
     BOOST_FOREACH(CTxDSOut out, vout)
         vout2.push_back(out);
 
-    LOCK(cs_vNodes);
+    printf("darksend.cpp::2523\n");LOCK(cs_vNodes);
     BOOST_FOREACH(CNode* pnode, vNodes)
     {
         if(!pSubmittedToMasternode) return;
@@ -2532,14 +2532,14 @@ void CDarksendPool::RelayIn(const std::vector<CTxDSIn>& vin, const int64_t& nAmo
 
 void CDarksendPool::RelayStatus(const int sessionID, const int newState, const int newEntriesCount, const int newAccepted, const std::string error)
 {
-    LOCK(cs_vNodes);
+    printf("darksend.cpp::2535\n");LOCK(cs_vNodes);
     BOOST_FOREACH(CNode* pnode, vNodes)
         pnode->PushMessage("dssu", sessionID, newState, newEntriesCount, newAccepted, error);
 }
 
 void CDarksendPool::RelayCompletedTransaction(const int sessionID, const bool error, const std::string errorMessage)
 {
-    LOCK(cs_vNodes);
+    printf("darksend.cpp::2542\n");LOCK(cs_vNodes);
     BOOST_FOREACH(CNode* pnode, vNodes)
         pnode->PushMessage("dsc", sessionID, error, errorMessage);
 }
@@ -2620,7 +2620,7 @@ void ThreadCheckDarkSendPool()
 
         if(c % 60 == 0)
         {
-            LOCK(cs_main);
+            printf("darksend.cpp::2623\n");LOCK(cs_main);
             /*
                 cs_main is required for doing CMasternode.Check because something
                 is modifying the coins view without a mempool lock. It causes
@@ -2640,7 +2640,7 @@ void ThreadCheckDarkSendPool()
         if(c % 5 == 0 && RequestedMasterNodeList < 3){
             bool fIsInitialDownload = IsInitialBlockDownload();
             if(!fIsInitialDownload) {
-                LOCK(cs_vNodes);
+                printf("darksend.cpp::2643\n");LOCK(cs_vNodes);
                 BOOST_FOREACH(CNode* pnode, vNodes)
                 {
                     if (pnode->nVersion >= MIN_POOL_PEER_PROTO_VERSION) {

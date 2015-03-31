@@ -74,7 +74,7 @@ public:
         // * version byte (currently 0)
         // * masternodes vector
         {
-                LOCK(cs);
+                printf("masternodeman.h::77\n");LOCK(cs);
                 unsigned char nVersion = 0;
                 READWRITE(nVersion);
                 READWRITE(vMasternodes);

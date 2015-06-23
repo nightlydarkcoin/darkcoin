@@ -162,7 +162,7 @@ CMasternode::CMasternode(const CMasternodeBroadcast& mnb)
     donationPercentage = mnb.donationPercentage;
     nScanningErrorCount = 0;
     nLastScanningErrorBlockHeight = 0;
-    nLastPaid = mnb.nLastPaid;
+    nLastPaid = 0;
     nVotedTimes = 0;
 }
 
@@ -178,7 +178,6 @@ void CMasternode::UpdateFromNewBroadcast(CMasternodeBroadcast& mnb)
     addr = mnb.addr;
     donationAddress = mnb.donationAddress;
     donationPercentage = mnb.donationPercentage;
-    nLastPaid = mnb.nLastPaid;
 }
 
 //
@@ -245,6 +244,19 @@ void CMasternode::Check()
     activeState = MASTERNODE_ENABLED; // OK
 }
 
+int64_t CMasternode::SecondsSincePayment() {
+    int64_t sec = (GetAdjustedTime() - nLastPaid);
+    int64_t month = 60*60*24*30;
+    if(sec < month) return sec; //if it's less than 30 days, give seconds
+
+    CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
+    ss << vin;
+    ss << sigTime;
+    uint256 hash =  ss.GetHash();
+
+    // return some deterministic value for unknown/unpaid but force it to be more than 30 days old
+    return month + hash.GetCompact(false);
+}
 
 CMasternodeBroadcast::CMasternodeBroadcast()
 {
@@ -376,17 +388,21 @@ bool CMasternodeBroadcast::CheckAndUpdate(int& nDos, bool fRequested)
 
     //search existing Masternode list, this is where we update existing Masternodes with new dsee broadcasts
     CMasternode* pmn = mnodeman.Find(vin);
+
     // if we are masternode but with undefined vin and this dsee is ours (matches our Masternode privkey) then just skip this part
     if(pmn != NULL && !(fMasterNode && activeMasternode.vin == CTxIn() && pubkey2 == activeMasternode.pubKeyMasternode))
     {
+        // if Requested, we don't want to update this info
+        if(fRequested) { Relay(false); return true;}
+
         // mn.pubkey = pubkey, IsVinAssociatedWithPubkey is validated once below,
         //   after that they just need to match
-        if(!fRequested && pmn->pubkey == pubkey && !pmn->UpdatedWithin(MASTERNODE_MIN_DSEE_SECONDS)){
+        if(pmn->pubkey == pubkey && !pmn->UpdatedWithin(MASTERNODE_MIN_DSEE_SECONDS)){
             pmn->UpdateLastSeen();
 
             if(pmn->sigTime < sigTime){ //take the newest entry
                 LogPrintf("dsee - Got updated entry for %s\n", addr.ToString().c_str());
-                
+                                
                 pmn->UpdateFromNewBroadcast((*this));
                 
                 pmn->Check();
@@ -395,7 +411,6 @@ bool CMasternodeBroadcast::CheckAndUpdate(int& nDos, bool fRequested)
                 }
             }
         }
-        return false;
     }
 
     return true;
@@ -551,8 +566,8 @@ bool CMasternodePing::CheckAndUpdate(int& nDos)
     if(pmn != NULL && pmn->protocolVersion >= nMasternodeMinProtocol)
     {
         // LogPrintf("mnping - Found corresponding mn for vin: %s\n", vin.ToString().c_str());
-        // take this only if it's newer and was last updated more then MASTERNODE_MIN_MNP_SECONDS ago
-        if(pmn->lastMnping < sigTime && !pmn->UpdatedWithin(MASTERNODE_MIN_MNP_SECONDS))
+        // take this only if it's newer and last ping was more then MASTERNODE_MIN_MNP_SECONDS ago
+        if(sigTime - pmn->lastMnping > MASTERNODE_MIN_MNP_SECONDS-60)
         {
             std::string strMessage = vin.ToString() + blockHash.ToString() + boost::lexical_cast<std::string>(sigTime);
 
@@ -572,13 +587,16 @@ bool CMasternodePing::CheckAndUpdate(int& nDos)
                 if((*mi).second->nHeight < chainActive.Height() - 24)
                 {
                     LogPrintf("mnping - Masternode %s block hash %s is too old\n", vin.ToString(), blockHash.ToString());
-                    nDos = 33;
+                    // Do nothing here (no Masternode update, no mnping relay)
+                    // Let this node to be visible but fail to accept mnping
+
                     return false;
                 }
             } else {
                 if (fDebug) LogPrintf("mnping - Masternode %s block hash %s is unknown\n", vin.ToString(), blockHash.ToString());
                 // maybe we stuck so we shouldn't ban this node, just fail to accept it
                 // TODO: or should we also request this block?
+
                 return false;
             }
 

@@ -321,6 +321,11 @@ CBlockTemplate* CreateNewBlock(const CScript& scriptPubKeyIn)
         // Masternode and general budget payments
         FillBlockPayee(txNew, nFees);
 
+        // Make payee
+	    if(txNew.vout.size() > 1){
+            pblock->payee = txNew.vout[1].scriptPubKey;
+        }
+
         nLastBlockTx = nBlockTx;
         nLastBlockSize = nBlockSize;
         LogPrintf("CreateNewBlock(): total size %u\n", nBlockSize);

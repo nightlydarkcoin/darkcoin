@@ -233,7 +233,7 @@ void CMasternodeMan::CheckAndRemove()
     //remove inactive
     vector<CMasternode>::iterator it = vMasternodes.begin();
     while(it != vMasternodes.end()){
-        if((*it).activeState == CMasternode::MASTERNODE_REMOVE || (*it).activeState == CMasternode::MASTERNODE_VIN_SPENT){
+        if((*it).activeState == CMasternode::MASTERNODE_REMOVE || (*it).activeState == CMasternode::MASTERNODE_VIN_SPENT || (*it).protocolVersion < nMasternodeMinProtocol){
             if(fDebug) LogPrintf("CMasternodeMan: Removing inactive Masternode %s - %i now\n", (*it).addr.ToString().c_str(), size() - 1);
             it = vMasternodes.erase(it);
         } else {
@@ -611,13 +611,14 @@ void CMasternodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CData
         mapSeenMasternodePing[mnp.GetHash()] = mnp;
 
         int nDoS = 0;
-        if(!mnp.CheckAndUpdate(nDoS))
+        if(mnp.CheckAndUpdate(nDoS))
         {
-            if(nDoS > 0)
-                Misbehaving(pfrom->GetId(), nDoS);
-
             //successful, we're done
             return;
+        } else { 
+            //failure
+            if(nDoS > 0)
+                Misbehaving(pfrom->GetId(), nDoS);
         }
 
         if(fDebug) LogPrintf("mnp - Couldn't find Masternode entry %s\n", mnp.vin.ToString().c_str());

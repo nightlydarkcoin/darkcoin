@@ -27,7 +27,7 @@
 
 #define MASTERNODE_MIN_CONFIRMATIONS           15
 #define MASTERNODE_MIN_MNP_SECONDS             (30*60)
-#define MASTERNODE_MIN_DSEE_SECONDS            (5*60)
+#define MASTERNODE_MIN_MNB_SECONDS             (5*60)
 #define MASTERNODE_PING_SECONDS                (15*60)
 #define MASTERNODE_EXPIRATION_SECONDS          (65*60)
 #define MASTERNODE_REMOVAL_SECONDS             (24*60*60)
@@ -66,7 +66,7 @@ public:
     CPubKey pubkey2;
     std::vector<unsigned char> sig;
     int activeState;
-    int64_t sigTime; //dsee message times
+    int64_t sigTime; //mnb message times
     int64_t lastMnping;
     int64_t lastTimeSeen;
     int cacheInputAge;
@@ -75,17 +75,14 @@ public:
     bool allowFreeTx;
     int protocolVersion;
     int64_t nLastDsq; //the dsq count from the last dsq broadcast of this node
-    CScript donationAddress;
-    int donationPercentage;
     int nScanningErrorCount;
     int nLastScanningErrorBlockHeight;
-    int64_t nLastPaid;
     int nVotedTimes;
 
     CMasternode();
     CMasternode(const CMasternode& other);
     CMasternode(const CMasternodeBroadcast& other);
-    CMasternode(CService newAddr, CTxIn newVin, CPubKey newPubkey, std::vector<unsigned char> newSig, int64_t newSigTime, CPubKey newPubkey2, int protocolVersionIn, CScript newDonationAddress, int newDonationPercentage);
+    CMasternode(CService newAddr, CTxIn newVin, CPubKey newPubkey, std::vector<unsigned char> newSig, int64_t newSigTime, CPubKey newPubkey2, int protocolVersionIn);
 
 
     void swap(CMasternode& first, CMasternode& second) // nothrow
@@ -110,11 +107,8 @@ public:
         swap(first.allowFreeTx, second.allowFreeTx);
         swap(first.protocolVersion, second.protocolVersion);
         swap(first.nLastDsq, second.nLastDsq);
-        swap(first.donationAddress, second.donationAddress);
-        swap(first.donationPercentage, second.donationPercentage);
         swap(first.nScanningErrorCount, second.nScanningErrorCount);
         swap(first.nLastScanningErrorBlockHeight, second.nLastScanningErrorBlockHeight);
-        swap(first.nLastPaid, second.nLastPaid);
         swap(first.nVotedTimes, second.nVotedTimes);
     }
 
@@ -148,9 +142,6 @@ public:
             READWRITE(sigTime);
             READWRITE(lastTimeSeen);
             READWRITE(protocolVersion);
-            READWRITE(donationAddress);
-            READWRITE(donationPercentage);
-            READWRITE(nLastPaid);
             READWRITE(activeState);
             READWRITE(lastMnping);
             READWRITE(cacheInputAge);
@@ -242,6 +233,8 @@ public:
         return strStatus;
     }
 
+    int64_t GetLastPaid();
+
 };
 
 
@@ -253,7 +246,7 @@ class CMasternodeBroadcast : public CMasternode
 {
 public:
     CMasternodeBroadcast();
-    CMasternodeBroadcast(CService newAddr, CTxIn newVin, CPubKey newPubkey, CPubKey newPubkey2, int protocolVersionIn, CScript newDonationAddress, int newDonationPercentage);
+    CMasternodeBroadcast(CService newAddr, CTxIn newVin, CPubKey newPubkey, CPubKey newPubkey2, int protocolVersionIn);
     CMasternodeBroadcast(const CMasternode& other);
 
     bool CheckAndUpdate(int& nDoS, bool fRequested);
@@ -273,8 +266,6 @@ public:
         READWRITE(sigTime);
         READWRITE(lastTimeSeen);
         READWRITE(protocolVersion);
-        READWRITE(donationAddress);
-        READWRITE(donationPercentage);
     }
     
     uint256 GetHash(){
@@ -298,7 +289,7 @@ public:
     CTxIn vin;
     uint256 blockHash;
     std::vector<unsigned char> vchSig;
-    int64_t sigTime; //dsee message times
+    int64_t sigTime; //mnb message times
     //removed stop
 
     CMasternodePing();
